@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitações - V'Action</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/solicitacoes.css">
+</head>
+<body>
+   
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <img src="../Assets/VAction_robo_branco.png" alt="Logo V'Action" class="navbar-logo">
+                <h2>V'Action</h2>
+            </div>
+            <div class="navbar-menu">
+                <a href="#" class="navbar-item">Início</a>
+                <a href="solicitacoes.html" class="navbar-item">Solicitações</a>
+                <a href="faq.html" class="navbar-item">Dúvidas</a>
+                <a href="../html/calendario.html" class="navbar-item">Calendário</a>
+                <a href="#" class="navbar-item">Meu Perfil</a>
+            </div>
+        </div>
+    </nav>
+
+  
+    <main class="main-container">
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="my-requests">Suas Solicitações</button>
+                <button class="tab-button" data-tab="approve-requests" id="approveTab">Aprovar Solicitações</button>
+            </div>
+            <div class="tab-content" id="my-requests">
+                <h1>Suas Solicitações</h1>
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Área</th>
+                            <th>Cargo</th>
+                            <th>Período</th>
+                            <th>Status</th>
+                            <th>Data da Solicitação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myRequestsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="tab-content" id="approve-requests" style="display: none;">
+                <h1>Aprovar Solicitações</h1>
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Área</th>
+                            <th>Cargo</th>
+                            <th>Período</th>
+                            <th>Data da Solicitação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approveRequestsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+ 
+    <footer class="footer">
+        <p>© 2025 V'Action. Todos os direitos reservados.</p>
+    </footer>
+
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">×</span>
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2 id="modalTitle">Solicitação Aprovada</h2>
+            <p id="modalMessage">A solicitação foi aprovada com sucesso.</p>
+            <button id="modalCloseButton" class="modal-button">Fechar</button>
+        </div>
+    </div>
+
+    <script src="../js/solicitacoes.js"></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - V'Action</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/perfil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <img src="../Assets/VAction_robo_branco.png" alt="Logo V'Action" class="navbar-logo">
+                <h2>V'Action</h2>
+            </div>
+            <div class="navbar-menu">
+                <a href="../html/inicio.html" class="navbar-item">Início</a>
+                <a href="../html/agendar_ferias.html" class="navbar-item">Agendar Férias</a>
+                <a href="../html/solicitacoes.html" class="navbar-item">Solicitações</a>
+                <a href="#" class="navbar-item">Dúvidas</a>
+                <a href="../html/calendario.html" class="navbar-item">Calendário</a>
+                <a href="#" class="navbar-item active">Meu Perfil</a>
+            </div>
+        </div>
+    </nav>
+
+    
+    <main class="main-container">
+        <div class="profile-container">
+            <h1 class="fade-in">Meu Perfil</h1>
+
+           
+            <div class="profile-card fade-in" id="profileCard">
+                <div class="profile-header">
+                    <div class="profile-photo-container">
+                        <img id="profilePhoto" src="../Assets/default_profile.png" alt="Foto de Perfil">
+                        <label for="photoUpload" class="photo-upload-label">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                    </div>
+                    <h2 id="profileName">Carregando...</h2>
+                </div>
+                <div class="profile-info">
+                    <p><strong>Email:</strong> <span id="profileEmail">Carregando...</span></p>
+                    <p><strong>Área:</strong> <span id="profileDepartment">Carregando...</span></p>
+                    <p><strong>Cargo:</strong> <span id="profileRole">Carregando...</span></p>
+                    <p><strong>Data de Admissão:</strong> <span id="profileHireDate">Carregando...</span></p>
+                    <p><strong>Última Alteração de Senha:</strong> <span id="profileLastPasswordChange">Carregando...</span></p>
+                    <p><strong>Notificações por Email:</strong> <span id="profileNotifications">Carregando...</span></p>
+                </div>
+                <button class="edit-button" id="editProfileButton"><i class="fas fa-edit"></i> Editar Perfil</button>
+            </div>
+
+           
+            <div class="edit-form-container fade-in" id="editFormContainer" style="display: none;">
+                <h2>Editar Perfil</h2>
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label for="editName">Nome</label>
+                        <input type="text" id="editName" name="name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPassword">Nova Senha (mínimo 8 caracteres, deixe em branco para não alterar)</label>
+                        <input type="password" id="editPassword" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartment">Área</label>
+                        <select id="editDepartment" name="department" required>
+                            <option value="TI">TI</option>
+                            <option value="RH">RH</option>
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRole">Cargo</label>
+                        <select id="editRole" name="role" required>
+                            <option value="Desenvolvedor">Desenvolvedor</option>
+                            <option value="Analista">Analista</option>
+                            <option value="Gerente">Gerente</option>
+                            <option value="Diretor">Diretor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNotifications">Receber Notificações por Email</label>
+                        <select id="editNotifications" name="notifications">
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="save-button"><i class="fas fa-save"></i> Salvar</button>
+                        <button type="button" class="cancel-button" id="cancelEditButton"><i class="fas fa-times"></i> Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+           
+            <div class="vacation-history-container fade-in">
+                <h2>Histórico de Férias</h2>
+                <table class="vacation-history-table">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Status</th>
+                            <th>Data da Solicitação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vacationHistoryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+   
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">×</span>
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2>Perfil Atualizado</h2>
+            <p>As informações do seu perfil foram atualizadas com sucesso.</p>
+            <button id="modalCloseButton" class="modal-button">Fechar</button>
+        </div>
+    </div>
+
+   
+    <footer class="footer">
+        <p>© 2025 V'Action. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="../js/perfil.js"></script>
+</body>
+</html>

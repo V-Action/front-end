@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Férias - V'Action</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/agendar_ferias.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <img src="../Assets/VAction_robo_branco.png" alt="Logo V'Action" class="navbar-logo">
+                <h2>V'Action</h2>
+            </div>
+            <div class="navbar-menu">
+                <a href="#" class="navbar-item">Início</a>
+                <a href="solicitacoes.html" class="navbar-item">Solicitações</a>
+                <a href="faq.html" class="navbar-item">Dúvidas</a>
+                <a href="../html/calendario.html" class="navbar-item">Calendário</a>
+                <a href="#" class="navbar-item">Meu Perfil</a>
+            </div>
+        </div>
+        </div>
+    </nav>
+
+
+    <main class="main-container">
+        <div class="form-container">
+            <h1>Solicitação de Férias</h1>
+            <form id="vacationForm">
+                <div class="form-group">
+                    <label for="name">Nome</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="department">Área</label>
+                    <select id="department" name="department" required>
+                        <option value="">Selecione</option>
+                        <option value="TI">TI</option>
+                        <option value="RH">RH</option>
+                        <option value="Vendas">Vendas</option>
+                        <option value="Marketing">Marketing</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="role">Cargo</label>
+                    <select id="role" name="role" required>
+                        <option value="">Selecione</option>
+                        <option value="Desenvolvedor">Desenvolvedor</option>
+                        <option value="Analista">Analista</option>
+                        <option value="Gerente">Gerente</option>
+                        <option value="Estagiário">Estagiário</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Data Inicial</label>
+                    <input type="date" id="startDate" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Data Final</label>
+                    <input type="date" id="endDate" name="endDate" required>
+                </div>
+                <button type="submit" class="simulate-button">Simular</button>
+            </form>
+        </div>
+
+       
+        <div class="calendar-container" id="simulationCalendar" style="display: none;">
+            <div class="calendar-header">
+                <button id="prevPeriod" class="nav-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <h1 id="simulationPeriodTitle">Período de Simulação</h1>
+                <button id="nextPeriod" class="nav-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
+            <div class="action-buttons">
+                <button id="changeDateButton" class="control-button">Alterar Data</button>
+                <button id="requestVacationButton" class="control-button primary">Requisitar Férias</button>
+            </div>
+            <div id="simulationDays" class="calendar-days"></div>
+        </div>
+    </main>
+
+
+    <footer class="footer">
+        <p>© 2025 V'Action. Todos os direitos reservados.</p>
+    </footer>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">×</span>
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2>Solicitação Enviada</h2>
+            <p>Aguardando aprovação do seu superior.</p>
+            <button id="modalCloseButton" class="modal-button">Fechar</button>
+        </div>
+    </div>
+
+    <script src="../js/agendar_ferias.js"></script>
+</body>
+</html>
