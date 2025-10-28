@@ -6,6 +6,7 @@
     <title>Agendar Férias - V'Action</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/agendar_ferias.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -16,11 +17,12 @@
                 <h2>V'Action</h2>
             </div>
             <div class="navbar-menu">
-                <a href="#" class="navbar-item">Início</a>
+                <a href="inicio.html" class="navbar-item">Início</a>
+                <a href="AgendarFerias.html" class="navbar-item active">Agendar Férias</a>
                 <a href="solicitacoes.html" class="navbar-item">Solicitações</a>
                 <a href="faq.html" class="navbar-item">Dúvidas</a>
                 <a href="../html/calendario.html" class="navbar-item">Calendário</a>
-                <a href="#" class="navbar-item">Meu Perfil</a>
+                <a href="perfil.html" class="navbar-item">Meu Perfil</a>
             </div>
         </div>
         </div>
@@ -32,28 +34,17 @@
             <h1>Solicitação de Férias</h1>
             <form id="vacationForm">
                 <div class="form-group">
+                <div class="form-group">
                     <label for="name">Nome</label>
-                    <input type="text" id="name" name="name" required>
+                    <input type="text" id="name" name="name" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="department">Área</label>
-                    <select id="department" name="department" required>
-                        <option value="">Selecione</option>
-                        <option value="TI">TI</option>
-                        <option value="RH">RH</option>
-                        <option value="Vendas">Vendas</option>
-                        <option value="Marketing">Marketing</option>
-                    </select>
+                    <input type="text" id="department" name="department" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="role">Cargo</label>
-                    <select id="role" name="role" required>
-                        <option value="">Selecione</option>
-                        <option value="Desenvolvedor">Desenvolvedor</option>
-                        <option value="Analista">Analista</option>
-                        <option value="Gerente">Gerente</option>
-                        <option value="Estagiário">Estagiário</option>
-                    </select>
+                    <input type="text" id="role" name="role" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="startDate">Data Inicial</label>
@@ -63,7 +54,7 @@
                     <label for="endDate">Data Final</label>
                     <input type="date" id="endDate" name="endDate" required>
                 </div>
-                <button type="submit" class="simulate-button">Simular</button>
+                <button type="submit" class="simulate-button">Solicitar Férias</button>
             </form>
         </div>
 
