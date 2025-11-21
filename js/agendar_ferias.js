@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ---- monta payload exatamente como no Postman ----
 try {
   // ---- monta payload exatamente como no Postman ----
-  const resposta = await fetch('http://localhost:8080/vaction/pedido/solicitar', {
+  const resposta = await fetch('vaction/pedido/solicitar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -87,7 +87,7 @@ try {
     const usuarioId = sessionStorage.getItem('ID_USUARIO');
     if (!usuarioId) throw new Error('ID_USUARIO não encontrado no sessionStorage.');
 
-    const resp = await fetch('http://localhost:8080/vaction/usuarios');
+    const resp = await fetch('vaction/usuarios');
     if (!resp.ok) throw new Error('Erro ao buscar usuários.');
 
     const lista = await resp.json();

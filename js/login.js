@@ -54,7 +54,7 @@ async function fazerLogin() {
 
   try {
 
-    const resposta = await fetch("http://localhost:8080/vaction/usuarios/autenticar", {
+    const resposta = await fetch("vaction/usuarios/autenticar", {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=UTF-8" },
       body: JSON.stringify(loginForm)
