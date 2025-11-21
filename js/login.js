@@ -1,14 +1,14 @@
-// ===== LOGIN - AUTENTICAÇÃO NOVO BACKEND =====
+ // ===== LOGIN - AUTENTICAÇÃO NOVO BACKEND =====
 // Suporta login por E-MAIL ou CPF + SENHA, enviando para POST /autenticar
 // Espera receber um UsuarioResponse (ex.: id, nome, email, cpf, autenticado, nivel, empresa, etc.)
 
 async function fazerLogin() {
-    console.log("entrei")
+  console.log("entrei")
   // =========================
   // 1) COLETA DE CAMPOS
   // =========================
   const valorIdentificador = document.getElementById("email")?.value?.trim() || ""; // pode ser e-mail OU CPF
-  const valorSenhaLogin   = document.getElementById("password")?.value || "";
+  const valorSenhaLogin = document.getElementById("password")?.value || "";
   // (Opcional) Se houver um campo específico de CPF no form, descomente:
   // const valorCpfCampo = document.getElementById("cpf")?.value?.replace(/\D/g, "") || "";
 
@@ -27,7 +27,7 @@ async function fazerLogin() {
   // Detecta se o identificador é e-mail (tem @) ou tratar como CPF
   const ehEmail = valorIdentificador.includes("@");
   let email = "";
-  let cpf   = "";
+  let cpf = "";
 
   if (ehEmail) {
     // Validação simples de e-mail
@@ -38,7 +38,7 @@ async function fazerLogin() {
     }
     email = valorIdentificador;
   } else {
-  
+
     cpf = valorIdentificador.replace(/\D/g, "");
     if (cpf.length < 11) {
       Swal.fire({ icon: "error", title: "Erro no login", text: "CPF inválido. Use 11 dígitos (apenas números)." });
@@ -64,40 +64,47 @@ async function fazerLogin() {
     if (resposta.status === 201 || resposta.status === 200) {
       const json = await resposta.json();
 
-      sessionStorage.setItem("ID_USUARIO",        String(json.id ?? json.id_usuario ?? ""));
-      sessionStorage.setItem("NOME_USUARIO",      json.nome ?? "");
-      sessionStorage.setItem("EMAIL_USUARIO",     json.email ?? "");
-      sessionStorage.setItem("CPF_USUARIO",       json.cpf ?? "");
-      sessionStorage.setItem("AUTENTICADO",       String(json.autenticado ?? true));
+      // Guarda dados principais do usuário
+      sessionStorage.setItem("ID_USUARIO", String(json.id ?? json.id_usuario ?? ""));
+      sessionStorage.setItem("NOME_USUARIO", json.nome ?? "");
+      sessionStorage.setItem("EMAIL_USUARIO", json.email ?? "");
+      sessionStorage.setItem("CPF_USUARIO", json.cpf ?? "");
+      sessionStorage.setItem("AUTENTICADO", String(json.autenticado ?? true));
 
-    
+      // Nivel de acesso, pega de onde existir
       const nivelAcesso =
-        json.nivel?.descricao ??
-        json.nivel_acesso?.descricao ??
-        json.nivel ??
-        json.nivelAcesso ??
-        "";
-      sessionStorage.setItem("NIVEL_ACESSO", json.nivelAcesso.nome);
-sessionStorage.setItem("cnpj_empresa", json.empresa.cnpj);
-sessionStorage.setItem("id_empresa", json.empresa.id);
-            
+        (json.nivelAcesso && (json.nivelAcesso.nome || json.nivelAcesso.descricao)) ??
+        (json.nivel && json.nivel.descricao) ??
+        (json.nivel_acesso && json.nivel_acesso.descricao) ??
+        json.nivel ?? "";
 
+      sessionStorage.setItem("NIVEL_ACESSO", nivelAcesso);
 
-      const empresaNome =
-        json.empresa?.nome ??
-        json.empresaNome ??
-        "";
-      sessionStorage.setItem("EMPRESA_NOME", empresaNome);
+      // Empresa, se existir no response
+      if (json.empresa) {
+        if (json.empresa.cnpj) {
+          sessionStorage.setItem("cnpj_empresa", json.empresa.cnpj);
+        }
+        if (json.empresa.id) {
+          sessionStorage.setItem("id_empresa", String(json.empresa.id));
+        }
+        if (json.empresa.nome) {
+          sessionStorage.setItem("EMPRESA_NOME", json.empresa.nome);
+        }
+      }
 
-      // Campos úteis se existirem no response
-      if (json.cargo)           sessionStorage.setItem("CARGO_USUARIO", json.cargo);
-      if (json.area)            sessionStorage.setItem("AREA_USUARIO", json.area);
-      if (json.dataAdmissao || json.data_admissao)
-        sessionStorage.setItem("DATA_ADMISSAO", json.dataAdmissao ?? json.data_admissao);
+      // Campos opcionais
+      if (json.cargo) {
+        sessionStorage.setItem("CARGO_USUARIO", json.cargo);
+      }
+      if (json.area) {
+        sessionStorage.setItem("AREA_USUARIO", json.area);
+      }
+      const dataAdmissao = json.dataAdmissao ?? json.data_admissao;
+      if (dataAdmissao) {
+        sessionStorage.setItem("DATA_ADMISSAO", dataAdmissao);
+      }
 
-      // =========================
-      // 6) FEEDBACK + REDIRECIONAMENTO
-      // =========================
       Swal.fire({
         icon: "success",
         title: "Autenticado!",
@@ -105,12 +112,11 @@ sessionStorage.setItem("id_empresa", json.empresa.id);
         showConfirmButton: false,
         timer: 1200
       }).then(() => {
-        // Regras de destino por nível de acesso (ajuste os paths conforme seu projeto)
+        // Usa o nivelAcesso calculado acima
         if (nivelAcesso === "GESTOR" || nivelAcesso === "RH") {
           window.location.href = "./inicio.html";
         } else {
-          // COLABORADOR ou outro
-          window.location.href = "./inicio.html";
+        window.location.href = "./inicio.html";
         }
       });
 
