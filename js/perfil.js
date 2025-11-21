@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    verificarAutenticacao()
     // Elementos do DOM
     const profileCard = document.getElementById('profileCard');
     const editFormContainer = document.getElementById('editFormContainer');
@@ -29,16 +30,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const editRole = document.getElementById('editRole');
     const editNotifications = document.getElementById('editNotifications');
 
-    // Dados mockados (simulando um backend)
+    const API_BASE_URL = "http://localhost:8080/vaction/usuarios";
+
     let userProfile = {
-        name: 'João Silva',
-        email: 'joao.silva@vaction.com',
-        department: 'TI',
-        role: 'Gerente',
-        hireDate: '2020-01-15',
-        lastPasswordChange: '2024-10-01',
+        name: "",
+        email: "",
+        department: "",
+        role: "",
+        hireDate: "",
+        lastPasswordChange: "",
         notificationsEnabled: true,
-        photo: '../Assets/default_profile.png' // Foto padrão
+        photo: "../Assets/default_profile.png"
     };
 
     const vacationHistory = [
@@ -74,16 +76,70 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${year}-${month}-${day}`;
     }
 
+    function carregarUsuarioDoBackend() {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        // segurança extra, redireciona se não tiver usuário
+        const currentPath = window.location.pathname;
+        const isInHtmlFolder = currentPath.includes("/html/");
+
+        if (isInHtmlFolder) {
+            window.location.href = "login.html";
+        } else {
+            window.location.href = "./html/login.html";
+        }
+        return;
+    }
+
+    fetch(API_BASE_URL + "/" + idUsuario)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Erro ao buscar usuário");
+            }
+            return response.json();
+        })
+        .then(json => {
+            userProfile.name = json.nome;
+            userProfile.email = json.email;
+            userProfile.department = json.area || "Não informado";
+            userProfile.role = json.cargo || "Não informado";
+            userProfile.hireDate = json.dataAdmissao || json.data_admissao || "";
+            userProfile.lastPasswordChange =
+                sessionStorage.getItem("DATA_ADMISSAO") ||
+                userProfile.hireDate ||
+                "";
+
+            userProfile.notificationsEnabled = true;
+
+            loadProfile();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Erro ao carregar dados do perfil");
+        });
+}
+
     // Carregar informações do perfil
     function loadProfile() {
-        profileName.textContent = userProfile.name;
-        profileEmail.textContent = userProfile.email;
-        profileDepartment.textContent = userProfile.department;
-        profileRole.textContent = userProfile.role;
-        profileHireDate.textContent = formatDate(userProfile.hireDate);
-        profileLastPasswordChange.textContent = formatDate(userProfile.lastPasswordChange);
-        profileNotifications.textContent = userProfile.notificationsEnabled ? 'Sim' : 'Não';
+        profileName.textContent = userProfile.name || "Nome não informado";
+        profileEmail.textContent = userProfile.email || "Email não informado";
+        profileDepartment.textContent = userProfile.department || "Não informado";
+        profileRole.textContent = userProfile.role || "Não informado";
+        if (userProfile.hireDate) {
+            profileHireDate.textContent = formatDate(userProfile.hireDate);
+        } else {
+            profileHireDate.textContent = "Não informado";
+        }
+
+        if (userProfile.lastPasswordChange) {
+            profileLastPasswordChange.textContent = formatDate(userProfile.lastPasswordChange);
+        } else {
+            profileLastPasswordChange.textContent = "Não informado";
+        }
+
+        profileNotifications.textContent = userProfile.notificationsEnabled ? "Sim" : "Não";
         profilePhoto.src = userProfile.photo;
+
     }
 
     // Carregar histórico de férias
@@ -110,12 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
         editPassword.value = '';
     }
 
-   
-    photoUpload.addEventListener('change', function(event) {
+
+    photoUpload.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 userProfile.photo = e.target.result;
                 profilePhoto.src = userProfile.photo;
             };
@@ -124,71 +180,71 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    editProfileButton.addEventListener('click', function() {
+    editProfileButton.addEventListener('click', function () {
         profileCard.style.display = 'none';
         editFormContainer.style.display = 'block';
         populateEditForm();
     });
 
-  
-    cancelEditButton.addEventListener('click', function() {
+
+    cancelEditButton.addEventListener('click', function () {
         editFormContainer.style.display = 'none';
         profileCard.style.display = 'block';
     });
 
-   
-    editProfileForm.addEventListener('submit', function(e) {
+
+    editProfileForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-      
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(editEmail.value)) {
             alert('Por favor, insira um email válido.');
             return;
         }
 
-        
+
         if (editPassword.value && editPassword.value.length < 8) {
             alert('A senha deve ter pelo menos 8 caracteres.');
             return;
         }
 
-       
+
         userProfile.email = editEmail.value;
         userProfile.department = editDepartment.value;
         userProfile.role = editRole.value;
         userProfile.notificationsEnabled = editNotifications.value === 'true';
         if (editPassword.value) {
-            userProfile.lastPasswordChange = getCurrentDate(); 
+            userProfile.lastPasswordChange = getCurrentDate();
         }
 
-       
+
         loadProfile();
 
-        
+
         confirmationModal.style.display = 'block';
 
-       
+
         editFormContainer.style.display = 'none';
         profileCard.style.display = 'block';
     });
 
-   
-    closeModal.addEventListener('click', function() {
+
+    closeModal.addEventListener('click', function () {
         confirmationModal.style.display = 'none';
     });
 
-    modalCloseButton.addEventListener('click', function() {
+    modalCloseButton.addEventListener('click', function () {
         confirmationModal.style.display = 'none';
     });
 
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         if (event.target === confirmationModal) {
             confirmationModal.style.display = 'none';
         }
     });
 
-   
-    loadProfile();
+
+    carregarUsuarioDoBackend();
     loadVacationHistory();
 });
