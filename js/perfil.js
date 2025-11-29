@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-    verificarAutenticacao()
-    // Elementos do DOM
+    verificarAutenticacao();
+
+    // ===========================
+    // ELEMENTOS DO DOM
+    // ===========================
     const profileCard = document.getElementById('profileCard');
     const editFormContainer = document.getElementById('editFormContainer');
     const editProfileButton = document.getElementById('editProfileButton');
@@ -24,11 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Elementos do formulário de edição
     const editName = document.getElementById('editName');
-    const editEmail = document.getElementById('editEmail');
     const editPassword = document.getElementById('editPassword');
-    const editDepartment = document.getElementById('editDepartment');
-    const editRole = document.getElementById('editRole');
-    const editNotifications = document.getElementById('editNotifications');
 
     const API_BASE_URL = "http://localhost:8080/vaction/usuarios";
 
@@ -58,16 +57,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     ];
 
-    // Função para formatar datas
+    // ===========================
+    // FUNÇÕES AUXILIARES
+    // ===========================
     function formatDate(dateStr) {
+        if (!dateStr) return "Não informado";
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return "Não informado";
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
     }
 
-    // Função para obter a data atual no formato YYYY-MM-DD (corrigindo fuso horário)
     function getCurrentDate() {
         const today = new Date();
         const year = today.getFullYear();
@@ -77,72 +79,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function carregarUsuarioDoBackend() {
-    const idUsuario = sessionStorage.getItem("ID_USUARIO");
-    if (!idUsuario) {
-        // segurança extra, redireciona se não tiver usuário
-        const currentPath = window.location.pathname;
-        const isInHtmlFolder = currentPath.includes("/html/");
+        const idUsuario = sessionStorage.getItem("ID_USUARIO");
+        if (!idUsuario) {
+            const currentPath = window.location.pathname;
+            const isInHtmlFolder = currentPath.includes("/html/");
 
-        if (isInHtmlFolder) {
-            window.location.href = "login.html";
-        } else {
-            window.location.href = "./html/login.html";
+            if (isInHtmlFolder) {
+                window.location.href = "login.html";
+            } else {
+                window.location.href = "./html/login.html";
+            }
+            return;
         }
-        return;
+
+        fetch(API_BASE_URL + "/" + idUsuario)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar usuário");
+                }
+                return response.json();
+            })
+            .then(json => {
+                userProfile.name = json.nome;
+                userProfile.email = json.email;
+                userProfile.department = json.area || "Não informado";
+                userProfile.role = json.cargo || "Não informado";
+                userProfile.hireDate = json.dataAdmissao || json.data_admissao || "";
+                userProfile.lastPasswordChange =
+                    sessionStorage.getItem("DATA_ADMISSAO") ||
+                    userProfile.hireDate ||
+                    "";
+
+                userProfile.notificationsEnabled = true;
+
+                loadProfile();
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Erro ao carregar dados do perfil");
+            });
     }
 
-    fetch(API_BASE_URL + "/" + idUsuario)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Erro ao buscar usuário");
-            }
-            return response.json();
-        })
-        .then(json => {
-            userProfile.name = json.nome;
-            userProfile.email = json.email;
-            userProfile.department = json.area || "Não informado";
-            userProfile.role = json.cargo || "Não informado";
-            userProfile.hireDate = json.dataAdmissao || json.data_admissao || "";
-            userProfile.lastPasswordChange =
-                sessionStorage.getItem("DATA_ADMISSAO") ||
-                userProfile.hireDate ||
-                "";
-
-            userProfile.notificationsEnabled = true;
-
-            loadProfile();
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Erro ao carregar dados do perfil");
-        });
-}
-
-    // Carregar informações do perfil
+    // ===========================
+    // CARREGAR PERFIL
+    // ===========================
     function loadProfile() {
         profileName.textContent = userProfile.name || "Nome não informado";
         profileEmail.textContent = userProfile.email || "Email não informado";
         profileDepartment.textContent = userProfile.department || "Não informado";
         profileRole.textContent = userProfile.role || "Não informado";
-        if (userProfile.hireDate) {
-            profileHireDate.textContent = formatDate(userProfile.hireDate);
-        } else {
-            profileHireDate.textContent = "Não informado";
-        }
 
-        if (userProfile.lastPasswordChange) {
-            profileLastPasswordChange.textContent = formatDate(userProfile.lastPasswordChange);
-        } else {
-            profileLastPasswordChange.textContent = "Não informado";
-        }
+        profileHireDate.textContent = userProfile.hireDate
+            ? formatDate(userProfile.hireDate)
+            : "Não informado";
+
+        profileLastPasswordChange.textContent = userProfile.lastPasswordChange
+            ? formatDate(userProfile.lastPasswordChange)
+            : "Não informado";
 
         profileNotifications.textContent = userProfile.notificationsEnabled ? "Sim" : "Não";
         profilePhoto.src = userProfile.photo;
-
     }
 
-    // Carregar histórico de férias
+    // ===========================
+    // HISTÓRICO DE FÉRIAS (mock)
+    // ===========================
     function loadVacationHistory() {
         vacationHistoryTableBody.innerHTML = '';
         vacationHistory.forEach(entry => {
@@ -156,17 +157,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Preencher o formulário de edição
+    // ===========================
+    // FORMULÁRIO DE EDIÇÃO
+    // ===========================
     function populateEditForm() {
-        editName.value = userProfile.name;
-        editEmail.value = userProfile.email;
-        editDepartment.value = userProfile.department;
-        editRole.value = userProfile.role;
-        editNotifications.value = userProfile.notificationsEnabled.toString();
+        editName.value = userProfile.name || "";
         editPassword.value = '';
     }
 
-
+    // Upload de foto (local, sem back ainda)
     photoUpload.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
@@ -179,57 +178,48 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
     editProfileButton.addEventListener('click', function () {
         profileCard.style.display = 'none';
         editFormContainer.style.display = 'block';
         populateEditForm();
     });
 
-
     cancelEditButton.addEventListener('click', function () {
         editFormContainer.style.display = 'none';
         profileCard.style.display = 'block';
     });
 
-
     editProfileForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(editEmail.value)) {
-            alert('Por favor, insira um email válido.');
-            return;
-        }
-
-
+        // Agora só valida a senha (se for alterar)
         if (editPassword.value && editPassword.value.length < 8) {
             alert('A senha deve ter pelo menos 8 caracteres.');
             return;
         }
 
-
-        userProfile.email = editEmail.value;
-        userProfile.department = editDepartment.value;
-        userProfile.role = editRole.value;
-        userProfile.notificationsEnabled = editNotifications.value === 'true';
+        // Atualiza apenas a parte de senha / data de alteração
         if (editPassword.value) {
             userProfile.lastPasswordChange = getCurrentDate();
+            // TODO: aqui você pode enviar a atualização de senha para o backend via fetch
+            // ex:
+            // fetch(API_BASE_URL + "/alterar-senha", { ... })
         }
 
-
+        // Recarrega os dados na tela
         loadProfile();
 
-
+        // Mostra modal de sucesso
         confirmationModal.style.display = 'block';
 
-
+        // Volta para o card de perfil
         editFormContainer.style.display = 'none';
         profileCard.style.display = 'block';
     });
 
-
+    // ===========================
+    // MODAL
+    // ===========================
     closeModal.addEventListener('click', function () {
         confirmationModal.style.display = 'none';
     });
@@ -244,7 +234,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
+    // ===========================
+    // INICIALIZAÇÃO
+    // ===========================
     carregarUsuarioDoBackend();
     loadVacationHistory();
 });

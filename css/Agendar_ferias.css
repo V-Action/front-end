@@ -7,10 +7,12 @@
 body {
     font-family: 'Open Sans', sans-serif;
     background-color: #f0f2f5;
-    min-height: 100vh;
+    height: 100vh;          /* ocupa exatamente 100% da tela */
     display: flex;
     flex-direction: column;
+    overflow: hidden;       /* remove o scroll da página */
 }
+
 
 .navbar {
     background: linear-gradient(135deg, #120052, #1a007a);
@@ -230,10 +232,12 @@ body {
     flex-grow: 1;
     width: 100%;
     background: white;
-    padding-top: 5rem;
+    padding-top: 5rem;          /* continua compensando a navbar fixa */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start; /* mantém o fluxo normal, sem empurrar demais */
+    overflow: hidden;            /* garante que nada extrapole para criar scroll */
 }
 
 .form-container {
@@ -243,7 +247,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 500px;
-    margin: 2rem 0;
+    margin: 1rem 0;    /* menos margem para não estourar a altura da tela */
 }
 
 .form-container h1 {

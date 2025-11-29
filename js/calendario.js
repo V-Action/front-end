@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-   
     const calendarDays = document.getElementById('calendarDays');
     const periodTitle = document.getElementById('periodTitle');
     const prevPeriodButton = document.getElementById('prevPeriod');
@@ -10,61 +9,61 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
     const vacationModal = document.getElementById('vacationModal');
 
-  
-    const vacationData = [
-        {
-            id: 1,
-            name: "João Silva",
-            startDate: new Date('2025-04-07'),
-            endDate: new Date('2025-04-11'),
-            department: "TI",
-            role: "Desenvolvedor",
-            project: "Sistema de Férias"
-        },
-        {
-            id: 2,
-            name: "Maria Oliveira",
-            startDate: new Date('2025-04-08'),
-            endDate: new Date('2025-04-12'),
-            department: "RH",
-            role: "Analista",
-            project: "Treinamentos"
-        },
-        {
-            id: 3,
-            name: "Carlos Souza",
-            startDate: new Date('2025-04-09'),
-            endDate: new Date('2025-04-15'),
-            department: "Vendas",
-            role: "Gerente",
-            project: "Clientes VIP"
-        },
-        {
-            id: 4,
-            name: "Ana Santos",
-            startDate: new Date('2025-04-14'),
-            endDate: new Date('2025-04-18'),
-            department: "Marketing",
-            role: "Analista",
-            project: "Campanha Digital"
-        },
-        {
-            id: 5,
-            name: "Pedro Costa",
-            startDate: new Date('2025-04-14'),
-            endDate: new Date('2025-04-16'),
-            department: "TI",
-            role: "Estagiário",
-            project: "Infraestrutura"
-        }
-    ];
+    // ====== NOVO: dados vêm do back ======
+    let vacationData = [];          // antes era const com mock
+    let filteredVacations = [];     // começa vazio, depois copia vacationData
+    let filtroDiasDisponiveisAtivo = false; // controla filtro de "dias disponíveis" (TODOS)
 
-  
+    // ====== NOVO: carregar calendário do backend ======
+    async function carregarCalendario() {
+        try {
+            const resp = await fetch('vaction/get-calendario');
+            if (!resp.ok) {
+                throw new Error('Erro ao buscar dados do calendário.');
+            }
+
+            const json = await resp.json();
+            console.log('Resposta vaction/get-calendario:', json);
+
+            const lista = Array.isArray(json) ? json : (json ? [json] : []);
+
+            vacationData = lista
+                .map(item => {
+                    const startRaw = item.startDate ?? item.dataInicio ?? item.data_inicio;
+                    const endRaw   = item.endDate   ?? item.dataFim    ?? item.data_fim;
+
+                    const startDate = startRaw ? new Date(startRaw) : null;
+                    const endDate   = endRaw   ? new Date(endRaw)   : null;
+
+                    return {
+                        id: item.id ?? item.idPedido ?? item.id_pedido,
+                        name: item.name ?? item.nome ?? item.nomeUsuario ?? item.colaborador,
+                        startDate,
+                        endDate,
+                        department: item.department ?? item.area ?? item.departamento,
+                        role: item.role ?? item.cargo ?? '',
+                        project: item.project ?? item.projeto ?? ''
+                    };
+                })
+                // só mantém os que têm datas válidas
+                .filter(v =>
+                    v.startDate instanceof Date && !isNaN(v.startDate) &&
+                    v.endDate   instanceof Date && !isNaN(v.endDate)
+                );
+
+            filteredVacations = [...vacationData];
+        } catch (erro) {
+            console.error('Erro ao carregar calendário:', erro);
+            vacationData = [];
+            filteredVacations = [];
+        }
+    }
+
+    // ================== LÓGICA ORIGINAL (mantida) ==================
+
     let currentStartDate = new Date(); 
     currentStartDate.setHours(0, 0, 0, 0);
-    let filteredVacations = [...vacationData];
 
-   
     function getMonday(date) {
         const day = date.getDay();
         const diff = date.getDate() - day + (day === 0 ? -6 : 1);
@@ -82,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generateColorFromName(name) {
         let hash = 0;
+        if (!name) return 'hsl(200, 70%, 60%)';
         for (let i = 0; i < name.length; i++) {
             hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
@@ -94,8 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const vacationEnd = new Date(vacation.endDate);
         vacationStart.setHours(0, 0, 0, 0);
         vacationEnd.setHours(0, 0, 0, 0);
-        date.setHours(0, 0, 0, 0);
-        return date >= vacationStart && date <= vacationEnd;
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d >= vacationStart && d <= vacationEnd;
     }
 
     function getVacationsForDate(date) {
@@ -106,18 +107,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function showVacationDetails(vacation) {
         document.getElementById('vacationModalTitle').textContent = `Férias de ${vacation.name}`;
         document.getElementById('vacationModalContent').innerHTML = `
-            <p><strong>Área:</strong> ${vacation.department}</p>
-            <p><strong>Cargo:</strong> ${vacation.role}</p>
-            <p><strong>Projeto:</strong> ${vacation.project}</p>
+            <p><strong>Área:</strong> ${vacation.department || 'N/A'}</p>
+            <p><strong>Cargo:</strong> ${vacation.role || 'N/A'}</p>
+            <p><strong>Projeto:</strong> ${vacation.project || 'N/A'}</p>
             <p><strong>Período:</strong> ${formatDate(vacation.startDate)} - ${formatDate(vacation.endDate)}</p>
-            <p><strong>Duração:</strong> ${Math.floor((new Date(vacation.endDate) - new Date(vacation.startDate)) / (86400000)) + 1} dias</p>
+            <p><strong>Duração:</strong> ${
+                Math.floor((new Date(vacation.endDate) - new Date(vacation.startDate)) / 86400000) + 1
+            } dias</p>
         `;
         vacationModal.style.display = 'block';
     }
 
-    
     function generatePeriod(startDate) {
-       
         calendarDays.classList.add('fade');
         
         setTimeout(() => {
@@ -132,12 +133,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             period.forEach((date) => {
+                // NOVO: primeiro vemos se o dia tem férias
+                const vacations = getVacationsForDate(date);
+
+                // Se o filtro "dias disponíveis" estiver ativo,
+                // só exibimos dias SEM ninguém de férias
+                if (filtroDiasDisponiveisAtivo && vacations.length > 0) {
+                    return; // pula este dia
+                }
+
                 const dayDiv = document.createElement('div');
                 dayDiv.classList.add('day');
               
                 const today = new Date();  
                 today.setHours(0, 0, 0, 0);
-                if (date.toDateString() === today.toDateString()) {
+                const d = new Date(date);
+                d.setHours(0, 0, 0, 0);
+                if (d.toDateString() === today.toDateString()) {
                     dayDiv.classList.add('today');
                 }
                 
@@ -150,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="vacation-container"></div>
                 `;
                 
-                const vacations = getVacationsForDate(date);
                 const container = dayDiv.querySelector('.vacation-container');
                 
                 vacations.forEach(vacation => {
@@ -161,13 +172,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     card.innerHTML = `
                         <div class="vacation-name">${vacation.name}</div>
                         <div class="vacation-details">
-                            <span>Área: ${vacation.department}</span>
-                            <span>Cargo: ${vacation.role}</span>
+                            <span>Área: ${vacation.department || 'N/A'}</span>
+                            <span>Cargo: ${vacation.role || 'N/A'}</span>
                         </div>
                     `;
                     card.addEventListener('click', () => showVacationDetails(vacation));
                     container.appendChild(card);
                 });
+
+                // Se o filtro de dias disponíveis estiver ativo e não há férias,
+                // podemos destacar visualmente o dia como "livre"
+                if (filtroDiasDisponiveisAtivo && vacations.length === 0) {
+                    dayDiv.classList.add('available-day');
+                }
                 
                 calendarDays.appendChild(dayDiv);
             });
@@ -176,12 +193,10 @@ document.addEventListener('DOMContentLoaded', function() {
             endDate.setDate(monday.getDate() + 14);
             periodTitle.textContent = `${formatDate(monday)} - ${formatDate(endDate)}`;
             
-          
             calendarDays.classList.remove('fade');
         }, 300);
     }
 
-  
     function navigatePeriod(direction) {
         const newDate = new Date(currentStartDate);
         newDate.setDate(currentStartDate.getDate() + (direction * 15));
@@ -189,28 +204,48 @@ document.addEventListener('DOMContentLoaded', function() {
         generatePeriod(currentStartDate);
     }
 
- 
+    // ====== AJUSTADO: filtros com permissionamento (NIVEL_ACESSO) ======
     function applyFilters() {
-        const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : null;
-        const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value) : null;
-        const availableDays = document.getElementById('availableDays').checked;
-        const department = document.getElementById('department').value;
-        const role = document.getElementById('role').value;
+        const startDateInputEl = document.getElementById('startDate');
+        const endDateInputEl   = document.getElementById('endDate');
+        const availableDaysEl  = document.getElementById('availableDays');
+        const departmentEl     = document.getElementById('department');
+        const roleEl           = document.getElementById('role');
+
+        const startDateInput = startDateInputEl ? startDateInputEl.value : '';
+        const endDateInput   = endDateInputEl ? endDateInputEl.value : '';
+        const availableDays  = availableDaysEl ? availableDaysEl.checked : false;
+        const department     = departmentEl ? departmentEl.value : '';
+        const role           = roleEl ? roleEl.value : '';
+
+        const startDate = startDateInput ? new Date(startDateInput) : null;
+        const endDate   = endDateInput ? new Date(endDateInput) : null;
+
+        // Nível de acesso (mesmo padrão da aba Início)
+        const nivel = (sessionStorage.getItem('NIVEL_ACESSO') || 'COLABORADOR').toUpperCase();
+
+        // TODOS podem ativar o filtro visual "dias disponíveis"
+        filtroDiasDisponiveisAtivo = availableDays;
 
         filteredVacations = vacationData.filter(vacation => {
             let matches = true;
 
+            // Filtro por período
             if (startDate && endDate) {
                 const vacationStart = new Date(vacation.startDate);
-                const vacationEnd = new Date(vacation.endDate);
+                const vacationEnd   = new Date(vacation.endDate);
                 matches = matches && (vacationStart <= endDate && vacationEnd >= startDate);
                 currentStartDate = startDate;
             }
 
-            if (department) {
-                matches = matches && vacation.department === department;
+            // Filtro por área => APENAS RH
+            if (department && nivel === 'RH') {
+                const depFiltro = department.trim().toUpperCase();
+                const depFerias = (vacation.department || '').trim().toUpperCase();
+                matches = matches && (depFerias === depFiltro);
             }
 
+            // Filtro por cargo => todos
             if (role) {
                 matches = matches && vacation.role === role;
             }
@@ -218,22 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return matches;
         });
 
-        if (availableDays) {
-            filteredVacations = filteredVacations.filter(vacation => {
-                const periodDates = [];
-                for (let i = 0; i < 15; i++) {
-                    const date = new Date(currentStartDate);
-                    date.setDate(currentStartDate.getDate() + i);
-                    periodDates.push(date);
-                }
-                return !periodDates.every(date => !isDateInVacation(date, vacation));
-            });
-        }
-
         generatePeriod(currentStartDate);
     }
 
- 
     prevPeriodButton.addEventListener('click', () => navigatePeriod(-1));
     nextPeriodButton.addEventListener('click', () => navigatePeriod(1));
 
@@ -260,11 +282,13 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.style.display = 'none';
     });
 
-
     vacationModal.querySelector('.close').addEventListener('click', () => {
         vacationModal.style.display = 'none';
     });
 
-   
-    generatePeriod(currentStartDate);
+    // ====== NOVO: carrega dados do back e só então gera o período ======
+    (async () => {
+        await carregarCalendario();
+        generatePeriod(currentStartDate);
+    })();
 });
