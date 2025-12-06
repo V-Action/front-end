@@ -18,7 +18,7 @@ function fazerLogout() {
         if (isInHtmlFolder) {
             window.location.href = 'login.html';
         } else {
-            window.location.href = './html/login.html';
+            window.location.href = './login.html';
         }
     }
 }
