@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editName = document.getElementById('editName');
     const editPassword = document.getElementById('editPassword');
 
-    const API_BASE_URL = "http://localhost:8080/vaction/usuarios";
+    const API_BASE_URL = "vaction/usuarios";
 
     let userProfile = {
         name: "",

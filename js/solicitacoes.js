@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Ajuste este endpoint conforme o seu back:
             // Ex.: GET vaction/pedidos/usuario/{idUsuario}
-            const resp = await fetch(`http://localhost:8080/vaction/pedidos/usuario/${currentUser.id}`);
+            const resp = await fetch(`vaction/pedidos/usuario/${currentUser.id}`);
             if (!resp.ok) {
                 throw new Error('Erro ao buscar suas solicitações.');
             }
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Ajuste este endpoint conforme o seu back:
             // Ex.: GET vaction/pedidos/pendentes/{idAprovador}
-            const resp = await fetch(`http://localhost:8080/vaction/pedidos/pendentes/${currentUser.id}`);
+            const resp = await fetch(`vaction/pedidos/pendentes/${currentUser.id}`);
             if (!resp.ok) {
                 throw new Error('Erro ao buscar solicitações pendentes para aprovação.');
             }

@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====== NOVO: carregar calendário do backend ======
     async function carregarCalendario() {
         try {
-            const resp = await fetch('http://localhost:8080/vaction/get-calendario');
+            const resp = await fetch('vaction/get-calendario');
             if (!resp.ok) {
                 throw new Error('Erro ao buscar dados do calendário.');
             }
