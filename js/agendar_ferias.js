@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ---- 2.5) Monta payload exatamente como no Postman ----
     try {
-      const resposta = await fetch('vaction/pedido/solicitar', {
+      const resposta = await fetch('http://localhost:8080/vaction/pedido/solicitar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const usuarioId = sessionStorage.getItem('ID_USUARIO');
     if (!usuarioId) throw new Error('ID_USUARIO não encontrado no sessionStorage.');
 
-    const resp = await fetch('vaction/usuarios');
+    const resp = await fetch('http://localhost:8080/vaction/usuarios');
     if (!resp.ok) throw new Error('Erro ao buscar usuários.');
 
     const lista = await resp.json();
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      const resp = await fetch(`vaction/dashboard/proximas-ferias/${usuarioId}`);
+      const resp = await fetch(`http://localhost:8080/vaction/dashboard/proximas-ferias/${usuarioId}`);
       if (!resp.ok) throw new Error("Erro ao buscar dados de férias.");
 
       const json = await resp.json();
