@@ -17,31 +17,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====== NOVO: carregar calendário do backend ======
     async function carregarCalendario() {
         try {
-            const resp = await fetch('vaction/get-calendario');
+            const resp = await fetch('vaction/pedido/calendario');
             if (!resp.ok) {
                 throw new Error('Erro ao buscar dados do calendário.');
             }
 
             const json = await resp.json();
-            console.log('Resposta vaction/get-calendario:', json);
+            console.log('Resposta vaction/pedido/calendario:', json);
 
             const lista = Array.isArray(json) ? json : (json ? [json] : []);
 
             vacationData = lista
                 .map(item => {
-                    const startRaw = item.startDate ?? item.dataInicio ?? item.data_inicio;
-                    const endRaw   = item.endDate   ?? item.dataFim    ?? item.data_fim;
+                    // O backend retorna Pedido com dataInicio e dataFim
+                    const startRaw = item.dataInicio ?? item.data_inicio ?? item.startDate;
+                    const endRaw   = item.dataFim    ?? item.data_fim    ?? item.endDate;
 
                     const startDate = startRaw ? new Date(startRaw) : null;
                     const endDate   = endRaw   ? new Date(endRaw)   : null;
 
+                    // O backend retorna usuario como objeto aninhado
+                    const usuario = item.usuario || {};
+                    const nome = usuario.nome || item.nome || '';
+                    const area = usuario.area || item.area || item.departamento || '';
+                    const cargo = usuario.cargo || item.cargo || item.role || '';
+
                     return {
                         id: item.id ?? item.idPedido ?? item.id_pedido,
-                        name: item.name ?? item.nome ?? item.nomeUsuario ?? item.colaborador,
+                        name: nome,
                         startDate,
                         endDate,
-                        department: item.department ?? item.area ?? item.departamento,
-                        role: item.role ?? item.cargo ?? '',
+                        department: area,
+                        role: cargo,
                         project: item.project ?? item.projeto ?? ''
                     };
                 })
