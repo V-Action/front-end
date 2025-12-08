@@ -111,6 +111,27 @@
         </div>
     </div>
 
+    <!-- Modal de Justificativa de Rejeição -->
+    <div id="rejectionModal" class="modal">
+        <div class="modal-content modal-rejection">
+            <span id="closeRejectionModal" class="close">×</span>
+            <div class="modal-icon rejection-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2>Justificar Rejeição</h2>
+            <p class="modal-subtitle">Por favor, informe o motivo da rejeição desta solicitação:</p>
+            <textarea id="rejectionReason" class="rejection-textarea" rows="5" placeholder="Digite o motivo da rejeição..." required></textarea>
+            <div class="modal-buttons">
+                <button id="cancelRejection" class="modal-button cancel-button">Cancelar</button>
+                <button id="confirmRejection" class="modal-button confirm-button">Confirmar Rejeição</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
     <script src="../js/user-menu.js"></script>
     <script src="../js/solicitacoes.js"></script>

@@ -16,7 +16,7 @@ async function carregarUltimaSolicitacao() {
   }
 
   try {
-    const resposta = await fetch(`vaction/dashboard/ultima-solicitacao/${usuarioId}`);
+    const resposta = await fetch(`/vaction/dashboard/ultima-solicitacao/${usuarioId}`);
 
     if (!resposta.ok) {
       throw new Error("Erro ao buscar última solicitação.");
@@ -59,7 +59,7 @@ async function carregarTempoParaFerias() {
   }
 
   try {
-    const resp = await fetch(`vaction/dashboard/proximas-ferias/${usuarioId}`);
+    const resp = await fetch(`/vaction/dashboard/proximas-ferias/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar dados de férias.");
 
     const json = await resp.json();
@@ -125,7 +125,7 @@ async function nomeUsuario() {
   }
 
   try {
-    const resposta = await fetch(`vaction/usuarios`);
+    const resposta = await fetch(`/vaction/usuarios`);
 
     if (!resposta.ok) {
       throw new Error("Erro ao buscar usuários.");
@@ -167,18 +167,23 @@ async function carregarNotificacoesRecentes() {
   }
 
   try {
-    const resposta = await fetch(`vaction/dashboard/notificacoes/${usuarioId}`);
+    const resposta = await fetch(`/vaction/dashboard/notificacoes/${usuarioId}`);
 
     if (!resposta.ok) {
+      if (resposta.status === 204) {
+        const listaNotificacoes = document.getElementById("notificationsList");
+        listaNotificacoes.innerHTML = '<li class="notification-item empty">Nenhuma notificação no momento.</li>';
+        return;
+      }
       throw new Error("Erro ao buscar notificações.");
     }
 
-    const notificacoes = await resposta.json(); // Espera um array no formato do mock
+    const notificacoes = await resposta.json(); // Espera um array
 
     const listaNotificacoes = document.getElementById("notificationsList");
     listaNotificacoes.innerHTML = ""; // Limpa a lista
 
-    if (notificacoes.length === 0) {
+    if (!Array.isArray(notificacoes) || notificacoes.length === 0) {
       const li = document.createElement("li");
       li.textContent = "Nenhuma notificação no momento.";
       li.classList.add("notification-item", "empty");
@@ -186,21 +191,40 @@ async function carregarNotificacoesRecentes() {
       return;
     }
 
-    // Ordenão: Ordena do mais recente para o mais antigo
-    notificacoes.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Ordena do mais recente para o mais antigo
+    notificacoes.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB - dateA;
+    });
 
-    // Limita a 5 notificações recentes (opcional)
-    notificacoes.slice(0, 5).forEach(notif => {
+    // Limita a 2 notificações recentes
+    notificacoes.slice(0, 2).forEach(notif => {
       const li = document.createElement("li");
       li.classList.add("notification-item");
 
       const dataFormatada = formatarData(notif.date);
-      const icone = notif.message.includes("pendente") ? "fa-exclamation-circle pending" :
-        notif.message.includes("aprovada") ? "fa-check-circle approved" :
-          "fa-info-circle";
+      
+      // Determina o ícone e classe baseado na mensagem
+      let icone = "fa-info-circle";
+      let classeIcone = "";
+      
+      if (notif.message.includes("aprovada pelo gestor")) {
+        icone = "fa-check-circle";
+        classeIcone = "approved";
+      } else if (notif.message.includes("aprovada pelo RH")) {
+        icone = "fa-check-circle";
+        classeIcone = "approved";
+      } else if (notif.message.includes("reprovada")) {
+        icone = "fa-times-circle";
+        classeIcone = "rejected";
+      } else if (notif.message.includes("pendente")) {
+        icone = "fa-exclamation-circle";
+        classeIcone = "pending";
+      }
 
       li.innerHTML = `
-            <i class="fas ${icone}"></i>
+            <i class="fas ${icone} ${classeIcone}"></i>
             <div class="notification-content">
                 <p>${notif.message}</p>
                 <span class="notification-date">${dataFormatada}</span>
@@ -229,7 +253,7 @@ async function carregarSlaMedioProcesso() {
   }
 
   try {
-    const resp = await fetch(`vaction/dashboard/sla-medio/${usuarioId}`);
+    const resp = await fetch(`/vaction/dashboard/sla-medio/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar SLA médio.");
 
     const valor = await resp.json(); // número direto (ex: 5.3)
@@ -256,7 +280,7 @@ async function carregarChamadosPendentes() {
   }
 
   try {
-    const resp = await fetch(`vaction/dashboard/chamados-pendentes/${usuarioId}`);
+    const resp = await fetch(`/vaction/dashboard/chamados-pendentes/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar chamados pendentes.");
 
     const data = await resp.json();
@@ -292,7 +316,7 @@ async function carregarDisponibilidadeEquipeResumo() {
   }
 
   try {
-    const resp = await fetch(`vaction/dashboard/disponibilidade-equipe/${gestorId}`);
+    const resp = await fetch(`/vaction/dashboard/disponibilidade-equipe/${gestorId}`);
     if (!resp.ok) throw new Error('Erro ao buscar disponibilidade da equipe.');
 
     const data = await resp.json();
@@ -449,7 +473,7 @@ async function carregarGraficoFeriasEquipe() {
   }
 
   try {
-    const resp = await fetch(`vaction/dashboard/analise-ferias-mes/${encodeURIComponent(empresaId)}`);
+    const resp = await fetch(`/vaction/dashboard/analise-ferias-mes/${encodeURIComponent(empresaId)}`);
     if (!resp.ok) throw new Error('Erro ao buscar análise de férias por mês');
     const json = await resp.json();
 

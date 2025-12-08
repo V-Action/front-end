@@ -91,31 +91,34 @@
                         <label for="endDate">Data Final</label>
                         <input type="date" id="endDate" name="endDate">
                     </div>
-                    <div class="form-group">
-                        <!-- <label for="availableDays">Dias Disponíveis (Sem Férias)</label> -->
-                        <!-- <input type="checkbox" id="availableDays" name="availableDays"> -->
+                    <div class="form-group" id="departmentGroup" style="display: none;">
+                        <label for="department">Área</label>
+                        <select id="department" name="department">
+                            <option value="">Todas</option>
+                        </select>
                     </div>
-                        <!-- <div class="form-group">
-                            <label for="department">Área</label>
-                            <select id="department" name="department">
-                                <option value="">Todas</option>
-                                <option value="TI">TI</option>
-                                <option value="RH">RH</option>
-                                <option value="Vendas">Vendas</option>
-                                <option value="Marketing">Marketing</option>
-                            </select>
-                        </div> -->
-                    <!-- <div class="form-group">
+                    <div class="form-group" id="roleGroup" style="display: none;">
                         <label for="role">Cargo</label>
                         <select id="role" name="role">
                             <option value="">Todos</option>
-                            <option value="Desenvolvedor">Desenvolvedor</option>
-                            <option value="Analista">Analista</option>
-                            <option value="Gerente">Gerente</option>
-                            <option value="Estagiário">Estagiário</option>
                         </select>
-                    </div> -->
-                    <button type="submit" class="submit-button">Aplicar Filtro</button>
+                    </div>
+                    <div class="form-group" id="employeeGroup" style="display: none;">
+                        <label for="employee">Colaborador</label>
+                        <select id="employee" name="employee">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="availableDays" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="availableDays" name="availableDays" style="width: auto;">
+                            <span>Mostrar apenas dias disponíveis (sem férias)</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button type="button" id="clearFilters" class="clear-button" style="flex: 1;">Limpar Filtros</button>
+                        <button type="submit" class="submit-button" style="flex: 1;">Aplicar Filtro</button>
+                    </div>
                 </form>
             </div>
         </div>

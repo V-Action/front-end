@@ -10,10 +10,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalCloseButton = document.getElementById('modalCloseButton');
     const modalTitle = document.getElementById('modalTitle');
     const modalMessage = document.getElementById('modalMessage');
+    
+    // Modal de Rejeição
+    const rejectionModal = document.getElementById('rejectionModal');
+    const closeRejectionModal = document.getElementById('closeRejectionModal');
+    const cancelRejection = document.getElementById('cancelRejection');
+    const confirmRejection = document.getElementById('confirmRejection');
+    const rejectionReason = document.getElementById('rejectionReason');
+    let currentRejectionRequestId = null;
 
     // ========= USUÁRIO LOGADO + PERMISSIONAMENTO =========
     const usuarioIdStr = sessionStorage.getItem('ID_USUARIO');
-    const nivelAcesso = (sessionStorage.getItem('NIVEL_ACESSO') || 'COLABORADOR').toUpperCase();
+    let nivelAcesso = sessionStorage.getItem('NIVEL_ACESSO') || 'COLABORADOR';
+
+    // Garantir que está em maiúsculas e tratar diferentes formatos
+    if (nivelAcesso) {
+        // Se for um objeto stringificado, tenta parsear
+        if (typeof nivelAcesso === 'string' && nivelAcesso.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(nivelAcesso);
+                nivelAcesso = parsed.nome || parsed.descricao || 'COLABORADOR';
+            } catch (e) {
+                // Se falhar, mantém o valor original
+            }
+        }
+        // Se vier como objeto aninhado (ex: "COLABORADOR" ou objeto com .nome)
+        if (typeof nivelAcesso === 'object' && nivelAcesso !== null) {
+            nivelAcesso = nivelAcesso.nome || nivelAcesso.descricao || 'COLABORADOR';
+        }
+    }
+
+    nivelAcesso = String(nivelAcesso).toUpperCase().trim();
 
     const currentUser = {
         id: usuarioIdStr ? parseInt(usuarioIdStr, 10) : null,
@@ -23,9 +50,20 @@ document.addEventListener('DOMContentLoaded', function() {
         nivel: nivelAcesso
     };
 
+    // Debug: verificar valores
+    console.log('Nível de Acesso:', nivelAcesso);
+    console.log('Elemento approveTab:', approveTab);
+
     // Colaborador NÃO vê a aba de aprovar
     if (nivelAcesso !== 'GESTOR' && nivelAcesso !== 'RH') {
-        approveTab.style.display = 'none';
+        if (approveTab) {
+            approveTab.style.display = 'none';
+            console.log('Aba "Aprovar Solicitações" ocultada para:', nivelAcesso);
+        } else {
+            console.error('Elemento approveTab não encontrado!');
+        }
+    } else {
+        console.log('Aba "Aprovar Solicitações" visível para:', nivelAcesso);
     }
 
     // ========= ARRAYS SEPARADOS =========
@@ -123,11 +161,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Ajuste este endpoint conforme o seu back:
-            // Ex.: GET vaction/pedidos/usuario/{idUsuario}
-            const resp = await fetch(`vaction/pedidos/usuario/${currentUser.id}`);
-            if (!resp.ok) {
+            // Endpoint: GET vaction/pedido/usuario/{idUsuario}
+            const resp = await fetch(`/vaction/pedido/usuario/${currentUser.id}`);
+            if (!resp.ok && resp.status !== 204) {
                 throw new Error('Erro ao buscar suas solicitações.');
+            }
+            if (resp.status === 204) {
+                myRequests = [];
+                loadMyRequests();
+                return;
             }
 
             const json = await resp.json();
@@ -157,11 +199,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Ajuste este endpoint conforme o seu back:
-            // Ex.: GET vaction/pedidos/pendentes/{idAprovador}
-            const resp = await fetch(`vaction/pedidos/pendentes/${currentUser.id}`);
-            if (!resp.ok) {
+            // Endpoint: GET vaction/pedido/pendentes/{idAprovador}
+            const resp = await fetch(`/vaction/pedido/pendentes/${currentUser.id}`);
+            if (!resp.ok && resp.status !== 204) {
                 throw new Error('Erro ao buscar solicitações pendentes para aprovação.');
+            }
+            if (resp.status === 204) {
+                pendingRequests = [];
+                loadApproveRequests();
+                return;
             }
 
             const json = await resp.json();
@@ -252,69 +298,116 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========= APROVAR / REJEITAR SOLICITAÇÃO (COM MOTIVO) =========
     async function handleRequestAction(requestId, actionLabel) {
-        let motivo = null;
-        let decisaoBackend = null;
-
         if (actionLabel === 'Rejeitado') {
-            // Pop-up simples para motivo da rejeição
-            motivo = window.prompt('Informe o motivo da rejeição (obrigatório):');
-            if (motivo === null) {
-                // Usuário cancelou o prompt
-                return;
-            }
-            motivo = motivo.trim();
-            if (!motivo) {
-                alert('É necessário informar um motivo para rejeitar a solicitação.');
-                return;
-            }
-            decisaoBackend = 'REPROVADO';
-        } else {
-            decisaoBackend = 'APROVADO';
+            // Abre modal de justificativa para rejeição
+            currentRejectionRequestId = requestId;
+            rejectionReason.value = '';
+            rejectionModal.style.display = 'block';
+            return;
         }
 
+        // Se for aprovação, processa diretamente
+        await processarAprovacao(requestId);
+    }
+
+    // ========= PROCESSAR APROVAÇÃO =========
+    async function processarAprovacao(requestId) {
         try {
-            // TODO: Ajustar endpoint e payload conforme o seu backend
-            // Exemplo:
-            /*
-            const resp = await fetch(`vaction/pedidos/${requestId}/decisao`, {
+            const payload = {
+                pedido: {
+                    id: requestId
+                },
+                usuario: {
+                    id: currentUser.id
+                },
+                decisao: {
+                    id: 1,
+                    nome: 'APROVADO'
+                },
+                observacao: null
+            };
+
+            const resp = await fetch(`/vaction/pedido`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    decisao: decisaoBackend,    // APROVADO | REPROVADO
-                    motivo: motivo || null,     // motivo só na rejeição
-                    usuarioId: currentUser.id   // quem aprovou/rejeitou
-                })
+                body: JSON.stringify(payload)
             });
+
             if (!resp.ok) {
-                throw new Error('Erro ao atualizar a solicitação.');
+                const errorText = await resp.text();
+                throw new Error(`Erro ao atualizar a solicitação: ${errorText}`);
             }
-            */
 
-            // Atualiza localmente para refletir na tela
-            myRequests = myRequests.map(r =>
-                r.id === requestId ? { ...r, status: actionLabel } : r
-            );
-            pendingRequests = pendingRequests.filter(r => r.id !== requestId);
+            // Recarrega as listas do servidor
+            await carregarMinhasSolicitacoes();
+            await carregarSolicitacoesPendentes();
 
-            modalTitle.textContent =
-                actionLabel === 'Aprovado'
-                    ? 'Solicitação Aprovada'
-                    : 'Solicitação Rejeitada';
-
-            modalMessage.textContent =
-                actionLabel === 'Aprovado'
-                    ? 'A solicitação foi aprovada com sucesso.'
-                    : 'A solicitação foi rejeitada com sucesso.';
-
+            modalTitle.textContent = 'Solicitação Aprovada';
+            modalMessage.textContent = 'A solicitação foi aprovada com sucesso.';
             confirmationModal.style.display = 'block';
-
-            loadMyRequests();
-            loadApproveRequests();
         } catch (erro) {
-            console.error('Erro ao processar ação:', erro);
+            console.error('Erro ao processar aprovação:', erro);
             modalTitle.textContent = 'Erro';
             modalMessage.textContent = 'Não foi possível atualizar a solicitação.';
             confirmationModal.style.display = 'block';
+        }
+    }
+
+    // ========= PROCESSAR REJEIÇÃO =========
+    async function processarRejeicao() {
+        if (!currentRejectionRequestId) {
+            return;
+        }
+
+        const motivo = rejectionReason.value.trim();
+        
+        if (!motivo) {
+            alert('É necessário informar um motivo para rejeitar a solicitação.');
+            return;
+        }
+
+        try {
+            const payload = {
+                pedido: {
+                    id: currentRejectionRequestId
+                },
+                usuario: {
+                    id: currentUser.id
+                },
+                decisao: {
+                    id: 2,
+                    nome: 'REPROVADO'
+                },
+                observacao: motivo
+            };
+
+            const resp = await fetch(`/vaction/pedido`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!resp.ok) {
+                const errorText = await resp.text();
+                throw new Error(`Erro ao atualizar a solicitação: ${errorText}`);
+            }
+
+            // Fecha modal de rejeição
+            rejectionModal.style.display = 'none';
+            rejectionReason.value = '';
+            currentRejectionRequestId = null;
+
+            // Recarrega as listas do servidor
+            await carregarMinhasSolicitacoes();
+            await carregarSolicitacoesPendentes();
+
+            // Mostra modal de confirmação
+            modalTitle.textContent = 'Solicitação Rejeitada';
+            modalMessage.textContent = 'A solicitação foi rejeitada com sucesso.';
+            confirmationModal.style.display = 'block';
+        } catch (erro) {
+            console.error('Erro ao processar rejeição:', erro);
+            alert('Não foi possível rejeitar a solicitação. Tente novamente.');
         }
     }
 
@@ -342,6 +435,39 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('click', function(event) {
         if (event.target === confirmationModal) {
             confirmationModal.style.display = 'none';
+        }
+        if (event.target === rejectionModal) {
+            rejectionModal.style.display = 'none';
+            rejectionReason.value = '';
+            currentRejectionRequestId = null;
+        }
+    });
+
+    // ========= EVENTOS DA MODAL DE REJEIÇÃO =========
+    closeRejectionModal.addEventListener('click', function() {
+        rejectionModal.style.display = 'none';
+        rejectionReason.value = '';
+        currentRejectionRequestId = null;
+    });
+
+    cancelRejection.addEventListener('click', function() {
+        rejectionModal.style.display = 'none';
+        rejectionReason.value = '';
+        currentRejectionRequestId = null;
+    });
+
+    confirmRejection.addEventListener('click', function() {
+        processarRejeicao();
+    });
+
+    // Fecha modal ao pressionar ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            if (rejectionModal.style.display === 'block') {
+                rejectionModal.style.display = 'none';
+                rejectionReason.value = '';
+                currentRejectionRequestId = null;
+            }
         }
     });
 

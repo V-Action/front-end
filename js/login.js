@@ -54,7 +54,7 @@ async function fazerLogin() {
 
   try {
 
-    const resposta = await fetch("vaction/usuarios/autenticar", {
+    const resposta = await fetch("/vaction/usuarios/autenticar", {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=UTF-8" },
       body: JSON.stringify(loginForm)
@@ -72,13 +72,20 @@ async function fazerLogin() {
       sessionStorage.setItem("AUTENTICADO", String(json.autenticado ?? true));
 
       // Nivel de acesso, pega de onde existir
-      const nivelAcesso =
-        (json.nivelAcesso && (json.nivelAcesso.nome || json.nivelAcesso.descricao)) ??
-        (json.nivel && json.nivel.descricao) ??
-        (json.nivel_acesso && json.nivel_acesso.descricao) ??
-        json.nivel ?? "";
+      const nivelAcessoObj = json.nivelAcesso || json.nivel || json.nivel_acesso;
+      let nivelAcessoValue = 'COLABORADOR';
 
-      sessionStorage.setItem("NIVEL_ACESSO", nivelAcesso);
+      if (nivelAcessoObj) {
+        // Tenta pegar o nome do enum
+        nivelAcessoValue = nivelAcessoObj.nome || nivelAcessoObj.descricao || 'COLABORADOR';
+        // Garante que está em string e maiúsculas
+        nivelAcessoValue = String(nivelAcessoValue).toUpperCase().trim();
+      } else if (json.nivel) {
+        nivelAcessoValue = String(json.nivel).toUpperCase().trim();
+      }
+
+      sessionStorage.setItem("NIVEL_ACESSO", nivelAcessoValue);
+      console.log('NIVEL_ACESSO salvo:', nivelAcessoValue);
 
       // Empresa, se existir no response
       if (json.empresa) {
@@ -112,8 +119,8 @@ async function fazerLogin() {
         showConfirmButton: false,
         timer: 1200
       }).then(() => {
-        // Usa o nivelAcesso calculado acima
-        if (nivelAcesso === "GESTOR" || nivelAcesso === "RH") {
+        // Usa o nivelAcessoValue calculado acima
+        if (nivelAcessoValue === "GESTOR" || nivelAcessoValue === "RH") {
           window.location.href = "./inicio.html";
         } else {
         window.location.href = "./inicio.html";

@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editName = document.getElementById('editName');
     const editPassword = document.getElementById('editPassword');
 
-    const API_BASE_URL = "vaction/usuarios";
+    const API_BASE_URL = "/vaction/usuarios";
 
     // Variável global para armazenar dados completos do usuário do backend
     let usuarioCompleto = null;
@@ -45,20 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
         photo: "../Assets/default_profile.png"
     };
 
-    const vacationHistory = [
-        {
-            startDate: '2024-04-05',
-            endDate: '2024-04-26',
-            requestDate: '2024-03-01',
-            status: 'Aprovado'
-        },
-        {
-            startDate: '2025-06-01',
-            endDate: '2025-06-15',
-            requestDate: '2025-05-01',
-            status: 'Pendente'
-        }
-    ];
+    let vacationHistory = [];
 
     // ===========================
     // FUNÇÕES AUXILIARES
@@ -119,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
             userProfile.notificationsEnabled = true;
 
             loadProfile();
+            await carregarHistoricoFerias();
         } catch (error) {
             console.error(error);
             alert("Erro ao carregar dados do perfil");
@@ -147,15 +135,76 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===========================
-    // HISTÓRICO DE FÉRIAS (mock)
+    // HISTÓRICO DE FÉRIAS (do back-end)
     // ===========================
+    async function carregarHistoricoFerias() {
+        const idUsuario = sessionStorage.getItem("ID_USUARIO");
+        if (!idUsuario) {
+            vacationHistory = [];
+            loadVacationHistory();
+            return;
+        }
+
+        try {
+            const resp = await fetch(`/vaction/pedido/usuario/${idUsuario}`);
+            if (!resp.ok && resp.status !== 204) {
+                throw new Error('Erro ao buscar histórico de férias.');
+            }
+
+            if (resp.status === 204) {
+                vacationHistory = [];
+                loadVacationHistory();
+                return;
+            }
+
+            const json = await resp.json();
+            const lista = Array.isArray(json) ? json : (json ? [json] : []);
+
+            vacationHistory = lista.map(item => {
+                const statusNome = item.status?.nome || item.status || '';
+                const statusFormatado = statusNome
+                    .replace('_', ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+
+                return {
+                    startDate: item.dataInicio || item.data_inicio,
+                    endDate: item.dataFim || item.data_fim,
+                    requestDate: item.dataSolicitacao || item.data_solicitacao,
+                    status: statusFormatado || 'Desconhecido'
+                };
+            }).sort((a, b) => {
+                // Ordena por data de solicitação (mais recente primeiro)
+                const dateA = new Date(a.requestDate);
+                const dateB = new Date(b.requestDate);
+                return dateB - dateA;
+            });
+
+            loadVacationHistory();
+        } catch (erro) {
+            console.error('Erro ao carregar histórico de férias:', erro);
+            vacationHistory = [];
+            loadVacationHistory();
+        }
+    }
+
     function loadVacationHistory() {
         vacationHistoryTableBody.innerHTML = '';
+        
+        if (vacationHistory.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="3">Nenhum histórico de férias encontrado.</td>';
+            vacationHistoryTableBody.appendChild(row);
+            return;
+        }
+
         vacationHistory.forEach(entry => {
             const row = document.createElement('tr');
+            const statusClass = (entry.status || '').toLowerCase().replace(/\s+/g, '-');
             row.innerHTML = `
                 <td>${formatDate(entry.startDate)} - ${formatDate(entry.endDate)}</td>
-                <td class="status-${entry.status.toLowerCase()}">${entry.status}</td>
+                <td class="status-${statusClass}">${entry.status}</td>
                 <td>${formatDate(entry.requestDate)}</td>
             `;
             vacationHistoryTableBody.appendChild(row);
@@ -256,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataAdmissao: usuarioCompleto.dataAdmissao || usuarioCompleto.data_admissao,
                 cargo: usuarioCompleto.cargo,
                 area: usuarioCompleto.area,
-                senha: editPassword.value || null,
+                senha: editPassword.value && editPassword.value.trim() !== '' ? editPassword.value.trim() : null,
                 empresa: usuarioCompleto.empresa,
                 nivelAcesso: usuarioCompleto.nivelAcesso,
                 autenticado: usuarioCompleto.autenticado
@@ -345,5 +394,4 @@ document.addEventListener('DOMContentLoaded', function () {
     // INICIALIZAÇÃO
     // ===========================
     carregarUsuarioDoBackend();
-    loadVacationHistory();
 });

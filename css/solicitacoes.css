@@ -426,6 +426,68 @@ body {
     background: #1a007a;
 }
 
+/* Modal de Rejeição */
+.modal-rejection {
+    max-width: 500px;
+    text-align: left;
+}
+
+.rejection-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.modal-subtitle {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.rejection-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    resize: vertical;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.rejection-textarea:focus {
+    outline: none;
+    border-color: #120052;
+}
+
+.rejection-textarea::placeholder {
+    color: #9ca3af;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.cancel-button {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.cancel-button:hover {
+    background: #e5e7eb;
+}
+
+.confirm-button {
+    background: #ef4444;
+    color: white;
+}
+
+.confirm-button:hover {
+    background: #dc2626;
+}
+
 
 @media (max-width: 768px) {
     .tabs {
