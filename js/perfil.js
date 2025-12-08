@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editName = document.getElementById('editName');
     const editPassword = document.getElementById('editPassword');
 
-    const API_BASE_URL = "/vaction/usuarios";
+    const API_BASE_URL = "vaction/usuarios";
 
     // Variável global para armazenar dados completos do usuário do backend
     let usuarioCompleto = null;
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
-            const resp = await fetch(`/vaction/pedido/usuario/${idUsuario}`);
+            const resp = await fetch(`vaction/pedido/usuario/${idUsuario}`);
             if (!resp.ok && resp.status !== 204) {
                 throw new Error('Erro ao buscar histórico de férias.');
             }

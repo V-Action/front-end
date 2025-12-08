@@ -16,7 +16,7 @@ async function carregarUltimaSolicitacao() {
   }
 
   try {
-    const resposta = await fetch(`/vaction/dashboard/ultima-solicitacao/${usuarioId}`);
+    const resposta = await fetch(`vaction/dashboard/ultima-solicitacao/${usuarioId}`);
 
     if (!resposta.ok) {
       throw new Error("Erro ao buscar última solicitação.");
@@ -59,7 +59,7 @@ async function carregarTempoParaFerias() {
   }
 
   try {
-    const resp = await fetch(`/vaction/dashboard/proximas-ferias/${usuarioId}`);
+    const resp = await fetch(`vaction/dashboard/proximas-ferias/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar dados de férias.");
 
     const json = await resp.json();
@@ -125,7 +125,7 @@ async function nomeUsuario() {
   }
 
   try {
-    const resposta = await fetch(`/vaction/usuarios`);
+    const resposta = await fetch(`vaction/usuarios`);
 
     if (!resposta.ok) {
       throw new Error("Erro ao buscar usuários.");
@@ -167,7 +167,7 @@ async function carregarNotificacoesRecentes() {
   }
 
   try {
-    const resposta = await fetch(`/vaction/dashboard/notificacoes/${usuarioId}`);
+    const resposta = await fetch(`vaction/dashboard/notificacoes/${usuarioId}`);
 
     if (!resposta.ok) {
       if (resposta.status === 204) {
@@ -253,7 +253,7 @@ async function carregarSlaMedioProcesso() {
   }
 
   try {
-    const resp = await fetch(`/vaction/dashboard/sla-medio/${usuarioId}`);
+    const resp = await fetch(`vaction/dashboard/sla-medio/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar SLA médio.");
 
     const valor = await resp.json(); // número direto (ex: 5.3)
@@ -280,7 +280,7 @@ async function carregarChamadosPendentes() {
   }
 
   try {
-    const resp = await fetch(`/vaction/dashboard/chamados-pendentes/${usuarioId}`);
+    const resp = await fetch(`vaction/dashboard/chamados-pendentes/${usuarioId}`);
     if (!resp.ok) throw new Error("Erro ao buscar chamados pendentes.");
 
     const data = await resp.json();
@@ -316,7 +316,7 @@ async function carregarDisponibilidadeEquipeResumo() {
   }
 
   try {
-    const resp = await fetch(`/vaction/dashboard/disponibilidade-equipe/${gestorId}`);
+    const resp = await fetch(`vaction/dashboard/disponibilidade-equipe/${gestorId}`);
     if (!resp.ok) throw new Error('Erro ao buscar disponibilidade da equipe.');
 
     const data = await resp.json();
@@ -473,7 +473,7 @@ async function carregarGraficoFeriasEquipe() {
   }
 
   try {
-    const resp = await fetch(`/vaction/dashboard/analise-ferias-mes/${encodeURIComponent(empresaId)}`);
+    const resp = await fetch(`vaction/dashboard/analise-ferias-mes/${encodeURIComponent(empresaId)}`);
     if (!resp.ok) throw new Error('Erro ao buscar análise de férias por mês');
     const json = await resp.json();
 

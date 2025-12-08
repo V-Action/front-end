@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Endpoint: GET vaction/pedido/usuario/{idUsuario}
-            const resp = await fetch(`/vaction/pedido/usuario/${currentUser.id}`);
+            const resp = await fetch(`vaction/pedido/usuario/${currentUser.id}`);
             if (!resp.ok && resp.status !== 204) {
                 throw new Error('Erro ao buscar suas solicitações.');
             }
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Endpoint: GET vaction/pedido/pendentes/{idAprovador}
-            const resp = await fetch(`/vaction/pedido/pendentes/${currentUser.id}`);
+            const resp = await fetch(`vaction/pedido/pendentes/${currentUser.id}`);
             if (!resp.ok && resp.status !== 204) {
                 throw new Error('Erro ao buscar solicitações pendentes para aprovação.');
             }
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 observacao: null
             };
 
-            const resp = await fetch(`/vaction/pedido`, {
+            const resp = await fetch(`vaction/pedido`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 observacao: motivo
             };
 
-            const resp = await fetch(`/vaction/pedido`, {
+            const resp = await fetch(`vaction/pedido`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

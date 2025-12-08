@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            const resp = await fetch(`/vaction/pedido/calendario/${usuarioId}`);
+            const resp = await fetch(`vaction/pedido/calendario/${usuarioId}`);
             if (resp.status === 204 || !resp.ok) {
                 vacationData = [];
                 filteredVacations = [];
